@@ -1,0 +1,123 @@
+version: "3.3"
+
+services:
+
+  kafka-neo4j:
+    image: kafka-neo4j
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+
+  neo4j:
+    image: neo4j:latest
+    networks:
+      - webnet
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - /home/ec2-user/POC/neo4j/plugins:/plugins
+      - /home/ec2-user/POC/neo4j/conf:/var/lib/neo4j/conf
+      - /home/ec2-user/POC/neo4j/data:/var/lib/neo4j/data
+    environment:
+      - NEO4J_AUTH=neo4j/hipaas2
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+
+  solr:
+    image: solr
+    networks:
+      - webnet
+    volumes:
+      - /home/ec2-user/POC/solr:/var/solr/data/IndeedResumes/ 
+    ports:
+      - 8983:8983
+    entrypoint:
+      - docker-entrypoint.sh
+      - solr-precreate
+      - IndeedResumes
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+
+  devcool-api:
+    image: devcool-api
+    ports:
+      - "5000:5000"
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - /home/ec2-user/POC/prometheus/prometheus-data:/prometheus
+      - /home/ec2-user/POC/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+
+  zookeeper:
+    image: wurstmeister/zookeeper
+    deploy:
+      replicas: 2
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: wurstmeister/kafka:latest
+    ports:
+      - "9094:9094"
+    environment:
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_CREATE_TOPICS: "messages:1:1"
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      KAFKA_LOG_DIRS: "/kafka/kafka-logs"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://:9092,OUTSIDE://34.212.248.28:9094
+      KAFKA_LISTENERS: INSIDE://:9092,OUTSIDE://:9094
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /home/ec2-user/POC/kafka/kafka-data:/kafka/kafka-logs
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker
+      replicas: 2
+
+  boomi:
+    image: boomi/atom:19.09.0
+    ports:
+      - "8883:9090"
+    environment:
+      URL: "platform.boomi.com"
+      BOOMI_USERNAME: "karan@devcool.com"
+      BOOMI_PASSWORD: "K@ran1devcool"
+      BOOMI_ATOMNAME: "docker_boomiatom"
+      BOOMI_CONTAINERNAME: "docker_boomiatom"
+      BOOMI_ACCOUNTID: "devcoolinc-0SV5Y9"
+      ATOM_LOCALHOSTID: "docker_boomiatom"
+    volumes:
+      -  /home/ec2-user/POC/boomi:/home/boomi/host_dir
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker
+      replicas: 1
+
+networks:
+  webnet:
+    driver: overlay
+
+
+
+

@@ -1,0 +1,26 @@
+version: "3.3"
+
+services:
+  neo4j:
+    image: neo4j:latest
+    networks:
+      - webnet
+    ports:
+      - "8883:7474"
+      - "5003:7687"
+    volumes:
+      - /home/ec2-user/neo4j-volume/plugins:/plugins
+      - /home/ec2-user/neo4j-volume/conf:/var/lib/neo4j/conf
+      - /home/ec2-user/neo4j-volume/data:/var/lib/neo4j/data
+    environment:
+      - NEO4J_AUTH=neo4j/hipaas2
+    deploy:
+      replicas: 1
+      placement: 
+        constraints: 
+          - node.role == manager
+
+networks:
+  webnet:
+    driver: overlay
+

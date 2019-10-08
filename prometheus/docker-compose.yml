@@ -1,0 +1,13 @@
+version: "3.3"
+services:
+  python-application:
+    image: python-prometheus
+    ports:
+      - "5001:5000"  
+  prometheus:
+    image: prom/prometheus
+    ports: 
+      - "5002:9090"
+    volumes:
+      - /home/ec2-user/prometheus/prometheus-data:/prometheus
+      - /home/ec2-user/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
