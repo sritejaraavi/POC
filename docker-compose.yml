@@ -1,15 +1,6 @@
 version: "3.3"
 
 services:
-
-  kafka-neo4j:
-    image: kafka-neo4j
-    deploy:
-      replicas: 1
-      placement:
-        constraints:
-          - node.role == manager
-
   neo4j:
     image: neo4j:latest
     networks:
@@ -18,9 +9,9 @@ services:
       - "7474:7474"
       - "7687:7687"
     volumes:
-      - /home/ec2-user/POC/neo4j/plugins:/plugins
-      - /home/ec2-user/POC/neo4j/conf:/var/lib/neo4j/conf
-      - /home/ec2-user/POC/neo4j/data:/var/lib/neo4j/data
+      - /home/centos/POC/neo4j/plugins:/plugins
+      - /home/centos/POC/neo4j/conf:/var/lib/neo4j/conf
+      - /home/centos/POC/neo4j/data:/var/lib/neo4j/data
     environment:
       - NEO4J_AUTH=neo4j/hipaas2
     deploy:
@@ -34,7 +25,7 @@ services:
     networks:
       - webnet
     volumes:
-      - /home/ec2-user/POC/solr:/var/solr/data/IndeedResumes/ 
+      - /home/centos/POC/solr:/var/solr/data/IndeedResumes/ 
     ports:
       - 8983:8983
     entrypoint:
@@ -47,23 +38,14 @@ services:
         constraints:
           - node.role == manager
 
-  devcool-api:
-    image: devcool-api
-    ports:
-      - "5000:5000"
-    deploy:
-      replicas: 1
-      placement:
-        constraints:
-          - node.role == manager
+
 
   prometheus:
     image: prom/prometheus
     ports:
       - "9090:9090"
     volumes:
-      - /home/ec2-user/POC/prometheus/prometheus-data:/prometheus
-      - /home/ec2-user/POC/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - /home/centos/POC/prometheus/prometheus-data:/prometheus
 
   zookeeper:
     image: wurstmeister/zookeeper
@@ -87,7 +69,7 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - /home/ec2-user/POC/kafka/kafka-data:/kafka/kafka-logs
+      - /home/centos/POC/kafka/kafka-data:/kafka/kafka-logs
     deploy:
       placement:
         constraints:
@@ -107,7 +89,7 @@ services:
       BOOMI_ACCOUNTID: "devcoolinc-0SV5Y9"
       ATOM_LOCALHOSTID: "docker_boomiatom"
     volumes:
-      -  /home/ec2-user/POC/boomi:/home/boomi/host_dir
+      -  /home/centos/POC/boomi:/home/boomi/host_dir
     deploy:
       placement:
         constraints:
@@ -117,7 +99,4 @@ services:
 networks:
   webnet:
     driver: overlay
-
-
-
 
