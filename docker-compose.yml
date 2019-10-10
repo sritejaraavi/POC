@@ -46,6 +46,7 @@ services:
       - "9090:9090"
     volumes:
       - /home/centos/POC/prometheus/prometheus-data:/prometheus
+      - /home/centos/POC/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
 
   zookeeper:
     image: wurstmeister/zookeeper
@@ -76,27 +77,8 @@ services:
           - node.role == worker
       replicas: 2
 
-  boomi:
-    image: boomi/atom:19.09.0
-    ports:
-      - "8883:9090"
-    environment:
-      URL: "platform.boomi.com"
-      BOOMI_USERNAME: "karan@devcool.com"
-      BOOMI_PASSWORD: "K@ran1devcool"
-      BOOMI_ATOMNAME: "docker_boomiatom"
-      BOOMI_CONTAINERNAME: "docker_boomiatom"
-      BOOMI_ACCOUNTID: "devcoolinc-0SV5Y9"
-      ATOM_LOCALHOSTID: "docker_boomiatom"
-    volumes:
-      -  /home/centos/POC/boomi:/home/boomi/host_dir
-    deploy:
-      placement:
-        constraints:
-          - node.role == worker
-      replicas: 1
+  
 
 networks:
   webnet:
     driver: overlay
-
